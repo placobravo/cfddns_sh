@@ -1,0 +1,1 @@
+# cfddns.sh
