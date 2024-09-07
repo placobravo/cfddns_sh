@@ -21,9 +21,11 @@ IPRETREIVER="ipinfo.io/ip"
 
 # If set to 0 there will not be any logging (previously created logs will be kept)
 LOGGING=1
+LOG_FILE="/var/log/cfddns.log"
 
 # If set to 1 there will not be any text output
-SILENT=0
+# Mostly used for debugging purposes
+SILENT=1
 
 
 
@@ -33,7 +35,7 @@ SILENT=0
 ################################################################
 
 create_log() {
-    [ ! -f ./cfddns.log ] && touch cfddns.log && chmod 440 cfddns.log
+    [ ! -f "$LOG_FILE" ] && touch "$LOG_FILE" && chmod 440 "$LOG_FILE"
 }
 
 logger() {
@@ -51,10 +53,10 @@ logger() {
         if [ "$SILENT" -eq 0 ]; then
             # LOGGING 1 SILENT 0
             echo "cfddns.sh: $1"
-            echo -e "$(date --rfc-email) \t $@" >> cfddns.log
+            echo -e "$(date --rfc-email) \t $@" >> "$LOG_FILE"
         else
             # LOGGING 1 SILENT 1
-            echo -e "$(date --rfc-email) \t $@" >> cfddns.log
+            echo -e "$(date --rfc-email) \t $@" >> "$LOG_FILE"
         fi
     fi
 }
@@ -75,7 +77,7 @@ DNS_RECORD_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE
 PUBLIC_IP=$(curl -s "$IPRETREIVER")
 if [[ ! $PUBLIC_IP =~ ^$IPREGEX ]]; then
     logger "Error, problems retreiving your public IP using $IPRETREIVER"
-    exit 0
+    exit 1
 fi
 
 # Get the current IP associated with $DOMAIN
